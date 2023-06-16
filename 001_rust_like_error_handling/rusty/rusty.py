@@ -12,12 +12,12 @@ class RustyError(Exception):
     ...
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Ok(Generic[T]):
     content: T
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Err(Generic[R]):
     content: R
 
@@ -106,7 +106,6 @@ def unwrap_return(func: Callable[..., Result[T, R]]) -> Callable[..., Result[T, 
             return func(*args, **kwargs)
         except ResultError as e:
             return e.err
-
     return _wrapper
 
 
@@ -117,5 +116,4 @@ def failure_return(func: Callable[..., Effect[R]]) -> Callable[..., Effect[R]]:
             return func(*args, **kwargs)
         except EffectError as e:
             return e.failure
-
     return _wrapper
