@@ -55,15 +55,15 @@ class InvalidEffectError(RustyError):
     ...
 
 
-def ok(content: T):
+def ok(content: T) -> Ok[T]:
     return Ok[T](content)
 
 
-def err(content: R):
+def err(content: R) -> Err[R]:
     return Err[R](content)
 
 
-def failure(content: R):
+def failure(content: R) -> Failure[R]:
     return Failure[R](content)
 
 
@@ -83,21 +83,23 @@ def unwrap(result: Result[T, R], /, *,
 
 
 def success(effect: Effect[R], /, *,
-            failure_handlers: Mapping[R | Any, Callable[[], T]] | None = None):
+            failure_handlers: Mapping[R | Any, Callable[..., None]] | None = None) -> bool:
     match effect:
         case Failure(content):
             if failure_handlers and content in failure_handlers:
-                return failure_handlers[content]()
+                failure_handlers[content]()
+                return True
             if failure_handlers and Any in failure_handlers:
-                return failure_handlers[Any]()
+                failure_handlers[Any]()
+                return True
             raise EffectError(effect)
         case Success():
-            return
+            return True
     raise InvalidEffectError(f"Invalid success called on effect {effect}. "
                              f"Expecting an {Success} or an {Failure} input. But got {type(effect)}.")
 
 
-def unwrap_return(func: Callable[..., Result[T, R]]):
+def unwrap_return(func: Callable[..., Result[T, R]]) -> Callable[..., Result[T, R]]:
     @wraps(func)
     def _wrapper(*args: Any, **kwargs: Any) -> Result[T, R]:
         try:
@@ -108,7 +110,7 @@ def unwrap_return(func: Callable[..., Result[T, R]]):
     return _wrapper
 
 
-def failure_return(func: Callable[..., Effect[R]]):
+def failure_return(func: Callable[..., Effect[R]]) -> Callable[..., Effect[R]]:
     @wraps(func)
     def _wrapper(*args: Any, **kwargs: Any) -> Effect[R]:
         try:
