@@ -14,11 +14,13 @@ class RustyError(Exception):
 
 @dataclass(frozen=True)
 class Ok(Generic[T]):
+    __slots__ = ('__orig_class__', 'content')
     content: T
 
 
 @dataclass(frozen=True)
 class Err(Generic[R]):
+    __slots__ = ('__orig_class__', 'content')
     content: R
 
 
@@ -28,6 +30,7 @@ class Success():
 
 @dataclass(slots=True, frozen=True)
 class Failure(Generic[R]):
+    __slots__ = ('__orig_class__', 'content')
     content: R
 
 
